@@ -589,7 +589,7 @@ class ParameterSet:
             self.params = self.default_params.copy()
 
         # for each param in the input        
-        for k, p in self.items():
+        for k, p in self.input_params.items():
             # ignore it if it not supported
             if k not in self._supported.keys():
                 logging.warning(f"Parameter {k} not supported. Ignoring it for now")
