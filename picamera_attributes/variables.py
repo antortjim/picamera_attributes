@@ -589,11 +589,11 @@ class ParameterSet:
             self.params = self.default_params.copy()
 
         # for each param in the input        
-        for k, p in self.input_params.items():
+        for k, p in self.items():
             # ignore it if it not supported
             if k not in self._supported.keys():
                 logging.warning(f"Parameter {k} not supported. Ignoring it for now")
-                if k in self.params.keys(): self.params.pop(k)
+                if k in self.keys(): self.pop(k)
                 continue
     
             # add it if it is the correct instance
@@ -605,7 +605,7 @@ class ParameterSet:
                 # and create an instance of the param on the spot
                 value = self._supported[k](value=p)
                 value.validate()
-                self.params[k] = value
+                self[k] = value
 
 
     def validate(self):
@@ -613,9 +613,9 @@ class ParameterSet:
         for k in dict(self.params).keys():
 
 
-            if k != self.params[k]._name or not isinstance(self.params[k], self._supported[k]):
-                logging.warning(f"Parameter {k} mapped to {self.params[k]._name}. Ignoring instance")
-                self.params[k].pop()
+            if k != self[k]._name or not isinstance(self[k], self._supported[k]):
+                logging.warning(f"Parameter {k} mapped to {self[k]._name}. Ignoring instance")
+                self.pop(k)
                 continue
 
         return True
@@ -623,7 +623,7 @@ class ParameterSet:
 
     def cross_verify(self):
 
-        for p in self.params.values():
+        for p in self.values():
 
             # try:
             #     print(p)
@@ -637,24 +637,30 @@ class ParameterSet:
             else:
                 dep_tests = []
                 for dep_name, dep_value in p._depends_on.items():
-                    dep_inst = self.params[dep_name]
+                    try:
+                        dep_inst = self.params[dep_name]
+                    
+                    except KeyError:
+                        dep_tests.append(False)
+                        continue
+
                     dep_tests.append(dep_inst._value == dep_value)
                 
                 if all(dep_tests):
                     p._active = True
                 else:
-                    logging.warning(f"Parameter {p._name} cross verification failed")
+                    logging.info(f"Parameter {p._name} cross verification failed")
                     #logging.warning(dep_tests)
                     p._active = False
 
 
     def as_dict(self):
-        result = {p._name: p.val for p in self.params.values()}
+        result = {p._name: p.val for p in self.values()}
         return result
 
     def urlencode(self, encoding='utf-8'):
 
-        result = urllib.parse.urlencode(self.as_dict(), encoding=endoding)
+        result = urllib.parse.urlencode(self.as_dict(), encoding=encoding)
         if encoding is not None:
             result = result.encode(encoding)
         return result
@@ -668,7 +674,7 @@ class ParameterSet:
         self.__init__(params_dict)
 
     def update_cam(self, camera):
-        for p in self.params.values():
+        for p in self.values():
             camera = p.update_cam(camera)
 
         attributes = {}        
@@ -695,17 +701,46 @@ class ParameterSet:
 
     def __eq__(self, other):
 
-        return all([self.params[k] == other.params[k] for k in self.params.keys()])
+        keys_are_shared = sorted(list(self.keys())) == sorted(list(other.keys()))
+        if not keys_are_shared:
+            return False
+
+        return all([self[k] == other[k] for k in self.keys()])
 
     def __sub__(self, other):
 
         final_set = self.copy()
-        for k, p in self.params.items():
-            if k in other.params.keys():
-                if p == other.params[k]:
-                    final_set.params.pop(k)
+        for k, p in self.items():
+            if k in other.keys():
+                if p == other[k]:
+                    final_set.pop(k)
 
         return final_set
+
+    def __setitem__(self, key, value):
+        self.params[key] = value
+
+    def __getitem__(self, name):
+        return self.params[name]
+
+    def __delitem__(self, name):
+        del self.params[name]
+
+    def pop(self, name):
+        return self.params.pop(name)
+
+    def keys(self):
+        return self.params.keys()
+
+    def values(self):
+        return self.params.values()
+
+    def items(self):
+        return self.params.items()
+
+    def __iter__(self):
+        return self.params.keys()
+
 
     def __getattr__(self, name):
 
@@ -713,43 +748,3 @@ class ParameterSet:
             return self.params[name]
         else:
             super().__getattribute__(name)
-
-
-if __name__ == "__main__":
-
-    iso = Iso(value = 100)
-    iso.validate()
-
-    shutter_speed = ShutterSpeed(value=30000)
-    shutter_speed.validate()
-
-    exposure_mode = ExposureMode(value = "auto")
-    exposure_mode.validate()
-
-    awb_gains = AWBGains(value='1,1')
-    awb_gains.validate()
-
-    zoom = Zoom(value = (0,0,1,1))
-    zoom.validate()
-
-    #param_set = ParameterSet({"zoom": zoom, "iso": iso, "shutter_speed": shutter_speed, "exposure_mode": exposure_mode, "awb_gains": awb_gains})
-    param_set = ParameterSet({})
-    print(param_set)
-    param_set.validate()
-    param_set.cross_verify()
-    # qs = param_set.urlencode()
-    # param_set_rv = ParameterSet({})
-    # param_set_rv.restore_qs(qs)
-    # param_set_rv.validate()
-    # param_set_rv.cross_verify()
-
-    # #print([s._default for s in ParameterSet._supported.values()])
-
-
-    
-    # # paramParameterSet({'iso': 100, 'shutter_speed': 30000.0, 'exposure_mode': 'auto'})
-    # # print(param_set_rv)
-    # # print(param_set)
-    # print(param_set == param_set_rv)
-    
-
