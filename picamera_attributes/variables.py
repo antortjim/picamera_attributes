@@ -4,7 +4,6 @@ import logging
 import math
 import urllib.request, urllib.error, urllib.parse
 from fractions import Fraction
-import picamera_gui.utils.helpers
 import traceback
 
 # inputs in html
@@ -654,7 +653,11 @@ class ParameterSet:
         return result
 
     def urlencode(self, encoding='utf-8'):
-        return picamera_gui.utils.helpers.urlencode(self.as_dict(), encoding)
+
+        result = urllib.parse.urlencode(self.as_dict(), encoding=endoding)
+        if encoding is not None:
+            result = result.encode(encoding)
+        return result
 
     def restore_qs(self, qs, encoding="utf-8"):
         if encoding is not None:

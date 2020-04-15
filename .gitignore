@@ -1,0 +1,5 @@
+tests/*
+dist/*
+*.pickle
+picamera_gui*-info/*
+__pycache__
