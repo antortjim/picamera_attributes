@@ -610,8 +610,7 @@ class ParameterSet:
 
     def validate(self):
                 
-        for k in dict(self.params).keys():
-
+        for k in self.keys():
 
             if k != self[k]._name or not isinstance(self[k], self._supported[k]):
                 logging.warning(f"Parameter {k} mapped to {self[k]._name}. Ignoring instance")
