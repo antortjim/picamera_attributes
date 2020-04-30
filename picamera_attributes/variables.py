@@ -42,15 +42,6 @@ import traceback
 
 
 
-supported = {
-    "awb_gains" : AWBGains, "awb_mode": AWBMode,
-    "exposure_mode": ExposureMode, "shutter_speed": ShutterSpeed,
-    "exposure_speed": ExposureSpeed, "exposure_compensation": ExposureCompensation,
-    "iso": Iso, "brightness": Brightness,
-    "rotation": Rotation, "sharpness": Sharpness, "contrast": Contrast,
-    "zoom": Zoom, "framerate": Framerate
-}
-
 class CameraParameter:
 
     _length = 1
@@ -151,6 +142,9 @@ class CameraParameter:
 
         result = self._value == other._value and self._active == other._active
         return result
+
+    def machine(self):
+        return self._value
     
     def validate(self):
 
@@ -385,6 +379,16 @@ class Framerate(FloatBoundedParameter):
     _name = "framerate"
 
 
+
+class DigitalGain(FloatBoundedParameter):
+    _min_val = 0.0
+    _max_val = 30.0
+    _name = "digital_gain"
+
+    def update_cam(self, camera):
+        return camera
+ 
+
 class AnalogGain(FloatBoundedParameter):
     _min_val = 0.0
     _max_val = 30.0
@@ -496,6 +500,18 @@ class ZoomCoord(FloatBoundedParameter):
     _name = "zoom_coord"
     _default = 0
 
+class Dimension(IntegerBoundedParameter):
+    _min_val = 0
+    _max_val = 3000
+    _default = 500
+    _name = "dimension"
+
+class Resolution(Plural, Dimension):
+
+    _length = 2
+    _name = "resolution"
+    _default = (1280, 960)
+
 class Zoom(Plural, ZoomCoord):
 
     _length = 4
@@ -572,6 +588,17 @@ class ShutterSpeed(ExposureSpeed):
         # use the get method of ExposureSpeed
         value = super()._get(camera, name = "exposure_speed")
         return value
+
+supported = {
+    "awb_gains" : AWBGains, "awb_mode": AWBMode,
+    "exposure_mode": ExposureMode, "shutter_speed": ShutterSpeed,
+    "exposure_speed": ExposureSpeed, "exposure_compensation": ExposureCompensation,
+    "iso": Iso, "brightness": Brightness,
+    "rotation": Rotation, "sharpness": Sharpness, "contrast": Contrast,
+    "zoom": Zoom, "framerate": Framerate, "analog_gain": AnalogGain, "digital_gain": DigitalGain,
+    "resolution": Resolution
+}
+
 
 class ParameterSet:
 
@@ -761,3 +788,4 @@ class ParameterSet:
             return self.params[name]
         else:
             super().__getattribute__(name)
+
