@@ -41,6 +41,16 @@ import traceback
 #  IMPLEMENTED # zoom                      GET / SET   float bounded 0,1 length 4
 
 
+
+supported = {
+    "awb_gains" : AWBGains, "awb_mode": AWBMode,
+    "exposure_mode": ExposureMode, "shutter_speed": ShutterSpeed,
+    "exposure_speed": ExposureSpeed, "exposure_compensation": ExposureCompensation,
+    "iso": Iso, "brightness": Brightness,
+    "rotation": Rotation, "sharpness": Sharpness, "contrast": Contrast,
+    "zoom": Zoom, "framerate": Framerate
+}
+
 class CameraParameter:
 
     _length = 1
@@ -80,6 +90,9 @@ class CameraParameter:
             self._value = self.coerce(value)
 
     def coerce(self, value):
+        r"""Make sure the value entered is mapped to the _var_type and _type of the class
+        In singular classes, they are the same, while in plurals, _var_type is tuple
+        """
 
         # if it's plural!   
         if self._length > 1:
@@ -166,22 +179,7 @@ class CameraParameter:
         self._active = True
         return self._active
 
-    # def _toggle_active(self, active):
-        # self._active = active
-        # try:
-        #     if active:
-        #         self._active = True
-        #     else:
-        #         self._active = False
-
-        # except AssertionError as e:
-        #     self._active = False
-        #     logging.error('Parameter {self._name} cannot be enabled due to a validation error. See below:')
-        #     raise e
-
-
     def __str__(self):
-
         return f"{self.__class__.__name__}(value={self._value})"
 
     def __repr__(self):
@@ -240,8 +238,8 @@ class CameraParameter:
         
         return value
 
-    # def _post(self):
-    #     return self._value
+    def get(self, camera, name):
+        return self._get(camera, name)
 
 class BooleanParameter(CameraParameter):
 
@@ -378,6 +376,22 @@ class Rotation(IntegerBoundedParameter):
     _options = [0, 90, 180, 270]
     _default = 0
     _name = "rotation"
+
+
+class Framerate(FloatBoundedParameter):
+
+    _min_val = 0.0
+    _max_val = 30.0
+    _name = "framerate"
+
+
+class AnalogGain(FloatBoundedParameter):
+    _min_val = 0.0
+    _max_val = 30.0
+    _name = "analog_gain"
+
+    def update_cam(self, camera):
+        return camera
     
 # class ColorEffect(IntegerBoundedParameter):
 
@@ -561,14 +575,7 @@ class ShutterSpeed(ExposureSpeed):
 
 class ParameterSet:
 
-    _supported = {
-        "awb_gains" : AWBGains, "awb_mode": AWBMode,
-        "exposure_mode": ExposureMode, "shutter_speed": ShutterSpeed,
-        "exposure_speed": ExposureSpeed, "exposure_compensation": ExposureCompensation,
-        "iso": Iso, "brightness": Brightness,
-        "rotation": Rotation, "sharpness": Sharpness, "contrast": Contrast,
-        "zoom": Zoom
-    }
+    _supported = supported
 
     def __init__(self, params: dict, default=False):
         
