@@ -596,7 +596,7 @@ class ParameterSet:
             self.params = self.default_params.copy()
 
         # for each param in the input        
-        for k, p in self.items():
+        for k, p in self.input_params.items():
             # ignore it if it not supported
             if k not in self._supported.keys():
                 logging.warning(f"Parameter {k} not supported. Ignoring it for now")
@@ -681,7 +681,14 @@ class ParameterSet:
 
     def update_cam(self, camera):
         for p in self.values():
-            camera = p.update_cam(camera)
+            if p._depends_on is None:
+                logging.warning(p._value)
+                camera = p.update_cam(camera)
+        for p in self.values():
+            if p._depends_on is not None:
+                logging.warning(p._value)
+                camera = p.update_cam(camera)
+
 
         attributes = {}        
         for p in self._supported.keys():
