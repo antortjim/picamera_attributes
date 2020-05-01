@@ -1,6 +1,7 @@
 __author__ = 'antonio'
 
 import logging
+logging.basicConfig(level=logging.INFO)
 import math
 import urllib.request, urllib.error, urllib.parse
 from fractions import Fraction
@@ -93,9 +94,9 @@ class CameraParameter:
             # coerce the parts to _type
             # and create a _var_type
             if type(value) is str:
-                # assume csv
+                sep = "," if "," in value else ":"
                 try:
-                    value = self._var_type([self._type(v) for v in  value.split(',')])
+                    value = self._var_type([self._type(v) for v in  value.split(sep)])
                 except ValueError as e:
                     logging.error(f"Could not coerce {value} to var_type {self._var_type} with data of type {self._type}")
                     logging.error(traceback.format_exc())
