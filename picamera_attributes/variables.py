@@ -6,7 +6,7 @@ import math
 import urllib.request, urllib.error, urllib.parse
 from fractions import Fraction
 import traceback
-from helpers import SENSOR_GAINS, set_gain
+from picamera_attributes.helpers import SENSOR_GAINS, set_gain
 # inputs in html
 
 # sliders -> numeric input
@@ -307,6 +307,7 @@ class BoundedParameter(CameraParameter):
 class IntegerBoundedParameter(BoundedParameter):
 
     _var_type = int
+    _type = int
 
     # TODO
     # Uncomment if I need to explictly inherit the __init__
@@ -382,11 +383,13 @@ class Framerate(FloatBoundedParameter):
 
     _min_val = 0.0
     _max_val = 30.0
+    _default = 2
     _name = "framerate"
 
 class DigitalGain(FloatBoundedParameter):
     _min_val = 0.0
     _max_val = 30.0
+    _default = 1.0
     _name = "digital_gain"
 
     def _set(self, camera):
@@ -396,6 +399,7 @@ class DigitalGain(FloatBoundedParameter):
 class AnalogGain(FloatBoundedParameter):
     _min_val = 0.0
     _max_val = 30.0
+    _default = 1.0
     _name = "analog_gain"
 
     def _set(self, camera):
