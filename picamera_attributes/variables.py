@@ -6,7 +6,7 @@ import math
 import urllib.request, urllib.error, urllib.parse
 from fractions import Fraction
 import traceback
-
+from helpers import SENSOR_GAINS, set_gain
 # inputs in html
 
 # sliders -> numeric input
@@ -195,14 +195,19 @@ class CameraParameter:
             return tuple((v._value for v in self._value))
 
     def update_cam(self, camera):
-        camera = self._set(camera)
+        camera = self.set(camera)
         return camera
 
+
     def _set(self, camera):
+        setattr(camera, self._name, self._value)
+        return camera
+
+    def set(self, camera):
 
         if self._value != self._get(camera) and self._active:
             try:
-                setattr(camera, self._name, self._value)
+                camera = self._set(camera)
             except Exception as e:
                 logging.error(f"Could not SET parameter {self._name} to {self._value}")
                 logging.error(f"{type(self._value)}")
@@ -379,24 +384,24 @@ class Framerate(FloatBoundedParameter):
     _max_val = 30.0
     _name = "framerate"
 
-
-
 class DigitalGain(FloatBoundedParameter):
     _min_val = 0.0
     _max_val = 30.0
     _name = "digital_gain"
 
-    def update_cam(self, camera):
+    def _set(self, camera):
+        camera = set_gain(camera, SENSOR_GAINS[self._name], self._value)
         return camera
  
-
 class AnalogGain(FloatBoundedParameter):
     _min_val = 0.0
     _max_val = 30.0
     _name = "analog_gain"
 
-    def update_cam(self, camera):
+    def _set(self, camera):
+        camera = set_gain(camera, SENSOR_GAINS[self._name], self._value)
         return camera
+
     
 # class ColorEffect(IntegerBoundedParameter):
 
@@ -451,10 +456,14 @@ class Plural:
             return self._value
 
     def _set(self, camera):
+        setattr(camera, self._name, self.machine())
+        return camera
+
+    def set(self, camera):
 
         if self.machine() != self._get(camera) and self._active:
             try:
-                setattr(camera, self._name, self.machine())
+                camera = self._set(camera)
             except Exception as e:
                 logging.error(f"Could not SET Parameter {self._name} to {self.machine()}")
                 logging.error(e)
@@ -564,11 +573,11 @@ class ExposureSpeed(IntegerBoundedParameter):
     _default = 0
     _name = "exposure_speed"
 
-    def _set(self, camera):
+    def set(self, camera):
         if self._name == "exposure_speed":
             return camera
         else:
-            return super()._set(camera)
+            return super().set(camera)
 
     def _get(self, camera, name=None):
         value = super()._get(camera, name)
