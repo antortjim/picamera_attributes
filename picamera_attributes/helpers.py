@@ -2,15 +2,7 @@ import time
 import logging
 logging.basicConfig(level=logging.INFO)
 
-from picamera import mmal, mmalobj, exc
-from picamera.mmalobj import to_rational
 
-
-# keys must match the _name attribute of the corresponding class
-SENSOR_GAINS = {
-    "analog_gain": mmal.MMAL_PARAMETER_GROUP_CAMERA + 0x59,
-    "digital_gain": mmal.MMAL_PARAMETER_GROUP_CAMERA + 0x5A
-}
 
 def set_gain(camera, gain, value):
     """Set the analog gain of a PiCamera.
@@ -19,7 +11,17 @@ def set_gain(camera, gain, value):
     gain: either MMAL_PARAMETER_ANALOG_GAIN or MMAL_PARAMETER_DIGITAL_GAIN
     value: a numeric value that can be converted to a rational number.
     """
-    ret = None
+    # lazy loading so node does not complain
+    from picamera import mmal, mmalobj, exc
+    from picamera.mmalobj import to_rational
+    
+    
+    # keys must match the _name attribute of the corresponding class
+    SENSOR_GAINS = {
+        "analog_gain": mmal.MMAL_PARAMETER_GROUP_CAMERA + 0x59,
+        "digital_gain": mmal.MMAL_PARAMETER_GROUP_CAMERA + 0x5A
+    }
+    ##
     logging.info(f"Setting {gain} to {value}")
 
     if gain not in ["analog_gain", "digital_gain"]:

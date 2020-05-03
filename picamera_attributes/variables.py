@@ -6,7 +6,7 @@ import math
 import urllib.request, urllib.error, urllib.parse
 from fractions import Fraction
 import traceback
-from picamera_attributes.helpers import SENSOR_GAINS, set_gain
+from picamera_attributes.helpers import set_gain
 # inputs in html
 
 # sliders -> numeric input
