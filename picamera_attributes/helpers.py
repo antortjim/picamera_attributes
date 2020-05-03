@@ -1,3 +1,4 @@
+import time
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -20,15 +21,24 @@ def set_gain(camera, gain, value):
     """
     ret = None
     logging.info(f"Setting {gain} to {value}")
+
     if gain not in ["analog_gain", "digital_gain"]:
         raise ValueError("The gain parameter was not valid")
 
-    ret = mmal.mmal_port_parameter_set_rational(camera._camera.control._port, 
-                                                    SENSOR_GAINS[gain],
-                                                    to_rational(value))
+    gain_int = SENSOR_GAINS[gain]
+    rational_value = to_rational(value)
+    port = camera._camera.control._port
+
+    logging.warning(gain_int)
+    logging.warning(rational_value)
+    logging.warning(port)
+
+    ret = mmal.mmal_port_parameter_set_rational(port, gain_int, rational_value)
+    # PLEASE NOTE
+    # if queried now, it will still show the old value
+    time.sleep(2)
+
     if ret == 4:
         raise exc.PiCameraMMALError(ret, "Are you running the latest version of the userland libraries? Gain setting was introduced in late 2017.")
     elif ret != 0:
         raise exc.PiCameraMMALError(ret)
-
-    return camera

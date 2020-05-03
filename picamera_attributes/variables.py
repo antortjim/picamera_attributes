@@ -393,8 +393,8 @@ class DigitalGain(FloatBoundedParameter):
     _name = "digital_gain"
 
     def _set(self, camera):
-        camera = set_gain(camera, SENSOR_GAINS[self._name], self._value)
-        return camera
+        set_gain(camera, self._name, self._value)
+        return camera 
  
 class AnalogGain(FloatBoundedParameter):
     _min_val = 0.0
@@ -403,8 +403,8 @@ class AnalogGain(FloatBoundedParameter):
     _name = "analog_gain"
 
     def _set(self, camera):
-        camera = set_gain(camera, SENSOR_GAINS[self._name], self._value)
-        return camera
+        set_gain(camera, self._name, self._value)
+        return camera 
 
 class ColorEffect(IntegerBoundedParameter):
     _min_val = 0
