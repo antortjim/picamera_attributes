@@ -406,19 +406,11 @@ class AnalogGain(FloatBoundedParameter):
         camera = set_gain(camera, SENSOR_GAINS[self._name], self._value)
         return camera
 
-    
-# class ColorEffect(IntegerBoundedParameter):
-
-#     # TODO
-
-#     def __init__(self, value = None, *args, **kwargs):
-#         super().__init__(value = value, min_val = 0, max_val = 255, name = "color_effect", *args, **kwargs)
-    
-#     def validate(self):
-#         if self._value is None:
-#             return
-#         else:
-#             super().validate()
+class ColorEffect(IntegerBoundedParameter):
+    _min_val = 0
+    _max_val = 255
+    _name = "color_effect"
+    _default = 128
 
 
 class AWBGain(FloatBoundedParameter):
@@ -426,11 +418,6 @@ class AWBGain(FloatBoundedParameter):
     _max_val = 8
     _name = "awb_gain"
     _default = 0
-
-    # TODO
-    # def __init__(self, value, *args, **kwargs):
-    #     super().__init__(value = value, *args, **kwargs)
-
 
 
 class Plural:
@@ -532,6 +519,12 @@ class Zoom(Plural, ZoomCoord):
     _name = "zoom"
     _default = (0,0,1,1)
     
+class ColorEffects(Plural, ColorEffect):
+
+    _length = 2
+    _name = "color_effects"
+    _default = (128, 128)
+
 class AWBGains(Plural, AWBGain):
 
     _length = 2
@@ -610,7 +603,7 @@ supported = {
     "iso": Iso, "brightness": Brightness,
     "rotation": Rotation, "sharpness": Sharpness, "contrast": Contrast,
     "zoom": Zoom, "framerate": Framerate, "analog_gain": AnalogGain, "digital_gain": DigitalGain,
-    "resolution": Resolution
+    "resolution": Resolution, "color_effects": ColorEffects
 }
 
 
